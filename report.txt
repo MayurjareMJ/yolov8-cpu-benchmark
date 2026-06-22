@@ -1,0 +1,60 @@
+Project Title
+
+Performance Benchmarking and Optimization of YOLOv8 Models on CPU-Only Systems using PyTorch, ONNX Runtime, OpenVINO and INT8 Quantization
+
+
+
+Final Repository Structure:
+
+yolov8-cpu-benchmark/
+│
+├── models/
+│   ├── yolov8n.pt
+│   ├── yolov8s.pt
+│   ├── onnx/
+│   ├── openvino/
+│
+├── scripts/
+│   ├── export_models.py
+│   ├── benchmark_pytorch.py
+│   ├── benchmark_onnx.py
+│   ├── benchmark_openvino.py
+│   ├── benchmark_openvino_int8.py
+│
+├── results/
+│   ├── benchmark.csv
+│   ├── graphs/
+│
+├── images/
+│
+├── report/
+│   └── benchmark_report.pdf
+│
+└── README.md
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,365 @@
+Option 2 (More Advanced)
+
+Compare formats:
+
+Model	Format
+YOLOv8n	PyTorch
+YOLOv8n	ONNX
+YOLOv8n	OpenVINO
+YOLOv8n	INT8 Quantized
+
+This is highly relevant for optimization engineers.
+
+
+Your laptop is actually **excellent for a CPU benchmarking project**.
+
+### Your Benchmark Hardware
+
+| Component | Specification            |
+| --------- | ------------------------ |
+| CPU       | Intel Core i5-1335U      |
+| Cores     | 10 Physical / 12 Logical |
+| RAM       | 16 GB                    |
+| GPU       | None                     |
+| OS        | Ubuntu 22.04             |
+| Python    | 3.10.12                  |
+| PyTorch   | 2.11                     |
+
+This is perfect for testing **real-world CPU deployment**.
+
+---
+
+# Project Title
+
+**Performance Benchmarking and Optimization of YOLOv8 Models on CPU-Only Systems using PyTorch, ONNX Runtime, OpenVINO and INT8 Quantization**
+
+---
+
+# Final Repository Structure
+
+```text
+yolov8-cpu-benchmark/
+│
+├── models/
+│   ├── yolov8n.pt
+│   ├── yolov8s.pt
+│   ├── onnx/
+│   ├── openvino/
+│
+├── scripts/
+│   ├── export_models.py
+│   ├── benchmark_pytorch.py
+│   ├── benchmark_onnx.py
+│   ├── benchmark_openvino.py
+│   ├── benchmark_openvino_int8.py
+│
+├── results/
+│   ├── benchmark.csv
+│   ├── graphs/
+│
+├── images/
+│
+├── report/
+│   └── benchmark_report.pdf
+│
+└── README.md
+```
+
+---
+
+# Phase 1: Environment Setup
+
+Create environment:
+
+```bash
+python3 -m venv venv
+
+source venv/bin/activate
+
+pip install ultralytics
+pip install openvino
+pip install onnx
+pip install onnxruntime
+pip install pandas
+pip install matplotlib
+pip install psutil
+```
+
+Verify:
+
+```bash
+python3 -c "import ultralytics;print('OK')"
+```
+
+---
+
+# Phase 2: Download Models
+
+Use:
+
+```python
+from ultralytics import YOLO
+
+YOLO("yolov8n.pt")
+YOLO("yolov8s.pt")
+```
+
+Start with:
+
+```text
+yolov8n
+yolov8s
+```
+
+Avoid m/l/x initially because CPU benchmark times become large.
+
+---
+
+# Phase 3: Export Models
+
+Create:
+
+```python
+from ultralytics import YOLO
+
+model = YOLO("yolov8n.pt")
+
+model.export(format="onnx")
+
+model.export(format="openvino")
+```
+
+Files generated:
+
+```text
+yolov8n.onnx
+
+yolov8n_openvino_model/
+```
+
+---
+
+# Phase 4: Benchmark PyTorch
+
+```python
+import time
+import cv2
+from ultralytics import YOLO
+
+model=YOLO("yolov8n.pt")
+
+img=cv2.imread("test.jpg")
+
+for _ in range(20):
+    model(img)
+
+start=time.time()
+
+for _ in range(100):
+    model(img)
+
+end=time.time()
+
+fps=100/(end-start)
+
+print("FPS:",fps)
+print("Latency:",1000/fps)
+```
+
+Measure:
+
+* FPS
+* Latency
+
+---
+
+# Phase 5: Benchmark ONNX
+
+```python
+import onnxruntime as ort
+import numpy as np
+import cv2
+import time
+```
+
+Load model:
+
+```python
+session=ort.InferenceSession(
+    "yolov8n.onnx",
+    providers=['CPUExecutionProvider']
+)
+```
+
+Run 100 iterations.
+
+Record FPS.
+
+---
+
+# Phase 6: Benchmark OpenVINO
+
+```python
+from openvino.runtime import Core
+
+core=Core()
+
+model=core.read_model(
+    "yolov8n_openvino_model/yolov8n.xml"
+)
+
+compiled_model=core.compile_model(
+    model,
+    "CPU"
+)
+```
+
+Run benchmark.
+
+Record FPS.
+
+---
+
+# Phase 7: INT8 Quantization
+
+Export:
+
+```python
+from ultralytics import YOLO
+
+model=YOLO("yolov8n.pt")
+
+model.export(
+    format="openvino",
+    int8=True
+)
+```
+
+This creates:
+
+```text
+yolov8n_openvino_int8_model
+```
+
+Benchmark again.
+
+---
+
+# Phase 8: Measure CPU Usage
+
+Install:
+
+```bash
+pip install psutil
+```
+
+Inside benchmark:
+
+```python
+import psutil
+
+cpu_usage=psutil.cpu_percent()
+
+print(cpu_usage)
+```
+
+Record average.
+
+---
+
+# Phase 9: Measure RAM Usage
+
+```python
+import psutil
+import os
+
+process=psutil.Process(os.getpid())
+
+ram=process.memory_info().rss/1024**2
+
+print(ram)
+```
+
+---
+
+# Phase 10: Final Results Table
+
+Expected structure:
+
+| Model | Format   | FPS | Latency(ms) | CPU% | RAM(MB) |
+| ----- | -------- | --- | ----------- | ---- | ------- |
+| v8n   | PyTorch  |     |             |      |         |
+| v8n   | ONNX     |     |             |      |         |
+| v8n   | OpenVINO |     |             |      |         |
+| v8n   | INT8     |     |             |      |         |
+| v8s   | PyTorch  |     |             |      |         |
+| v8s   | ONNX     |     |             |      |         |
+| v8s   | OpenVINO |     |             |      |         |
+| v8s   | INT8     |     |             |      |         |
+
+---
+
+# Phase 11: Graphs
+
+Generate:
+
+### Graph 1
+
+```text
+FPS Comparison
+```
+
+### Graph 2
+
+```text
+Latency Comparison
+```
+
+### Graph 3
+
+```text
+RAM Usage
+```
+
+### Graph 4
+
+```text
+CPU Usage
+```
+
+---
+
+# Expected Findings on Your CPU
+
+For an Intel i5-1335U, typical relative results are:
+
+| Format        | Relative Speed |
+| ------------- | -------------- |
+| PyTorch       | 1x             |
+| ONNX          | 1.2x - 1.5x    |
+| OpenVINO      | 1.5x - 2.5x    |
+| OpenVINO INT8 | 2x - 4x        |
+
+OpenVINO and INT8 are where you'll likely see the biggest gains because Intel CPUs are heavily optimized for them.
+
+---
+
+# What Makes This Resume-Worthy
+
+Don't stop at FPS.
+
+Add:
+
+* Hardware specs
+* Reproducible scripts
+* CSV results
+* Graphs
+* Analysis
+* Conclusions
+
+Then write a README like:
+
+> Benchmarked YOLOv8n and YOLOv8s on an Intel i5-1335U CPU running Ubuntu 22.04. Compared PyTorch, ONNX Runtime, OpenVINO FP32, and OpenVINO INT8 across FPS, latency, memory usage, and CPU utilization.
+
+That turns it from a simple experiment into a portfolio project that demonstrates deployment and optimization skills.
+
